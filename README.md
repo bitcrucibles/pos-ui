@@ -94,7 +94,7 @@ Make sure you have Flutter 3 installed on your system before continuing the setu
 
 ### Setting up for Android
 
-1. Build `breez.aar` as described in https://github.com/breez/breez
+1. Build `breez.aar` as described in https://github.com/bitcrucibles/pos-server
 2. Create a symlink from the `breez.aar` to `android/app/libs` directory.
 3. Create an Android app on [Firebase](https://console.firebase.google.com/) and download `google-services.json` file.
   - **Package name (for debugging):** com.breez.client.debug
