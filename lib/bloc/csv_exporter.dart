@@ -13,8 +13,13 @@ import 'package:path_provider/path_provider.dart';
 class CsvExporter {
   final List<CsvData> data;
   final PaymentFilterModel filter;
+  final bool usesUtcTime;
 
-  CsvExporter(this.data, this.filter);
+  const CsvExporter(
+    this.data,
+    this.filter, {
+    this.usesUtcTime = false,
+  });
 
   Future export() async {
     log.info("export payments started");
@@ -28,14 +33,17 @@ class CsvExporter {
     log.info("generating payment list started");
     final texts = getSystemAppLocalizations();
     final fiatCurrencies = _fiatCurrencies();
-    List<List<String>> paymentList = List.generate(this.data.length, (index) {
+    List<List<String>> paymentList = List.generate(data.length, (index) {
       List<String> paymentItem = [];
       final data = this.data.elementAt(index);
       final paymentInfo = data.paymentInfo;
       final sale = data.sale;
       paymentItem.add(BreezDateUtils.formatYearMonthDayHourMinute(
-          DateTime.fromMillisecondsSinceEpoch(
-              paymentInfo.creationTimestamp.toInt() * 1000)));
+        DateTime.fromMillisecondsSinceEpoch(
+          paymentInfo.creationTimestamp.toInt() * 1000,
+          isUtc: usesUtcTime,
+        ),
+      ));
       paymentItem.add(paymentInfo.title);
       paymentItem.add(paymentInfo.description);
       paymentItem.add(paymentInfo.destination);
@@ -74,7 +82,7 @@ class CsvExporter {
         .map((e) => e?.keys ?? [])
         .map((e) => e.toSet())
         .map((e) => e.difference({"BTC", "SAT"}))
-        .fold(Set<String>(), (p, e) => p.union(e));
+        .fold(<String>{}, (p, e) => p.union(e));
   }
 
   Future<String> _saveCsvFile(String csv) async {
@@ -99,16 +107,16 @@ class CsvExporter {
   String _appendFilterInformation(String filePath) {
     log.info("add filter information to path started");
     if (listEquals(
-        this.filter.paymentType, [PaymentType.SENT, PaymentType.WITHDRAWAL])) {
+        filter.paymentType, [PaymentType.SENT, PaymentType.WITHDRAWAL])) {
       filePath += "_sent";
     } else if (listEquals(
-        this.filter.paymentType, [PaymentType.RECEIVED, PaymentType.DEPOSIT])) {
+        filter.paymentType, [PaymentType.RECEIVED, PaymentType.DEPOSIT])) {
       filePath += "_received";
     }
-    if (this.filter.startDate != null && this.filter.endDate != null) {
+    if (filter.startDate != null && filter.endDate != null) {
       DateFormat dateFilterFormat = DateFormat("d.M.yy");
       String dateFilter =
-          '${dateFilterFormat.format(this.filter.startDate)}-${dateFilterFormat.format(this.filter.endDate)}';
+          '${dateFilterFormat.format(filter.startDate)}-${dateFilterFormat.format(filter.endDate)}';
       filePath += "_$dateFilter";
     }
     log.info("add filter information to path finished");

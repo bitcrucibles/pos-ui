@@ -1,8 +1,7 @@
 import 'package:breez/bloc/reverse_swap/reverse_swap_model.dart';
-import 'package:breez/widgets/loader.dart';
-import 'package:breez/widgets/payment_details_dialog.dart';
-import 'package:flutter/material.dart';
+import 'package:breez/routes/home/widgets/payments_list/dialog/tx_widget.dart';
 import 'package:breez_translations/breez_translations_locales.dart';
+import 'package:flutter/material.dart';
 
 class TxWidgetWithInfoMsg extends StatelessWidget {
   const TxWidgetWithInfoMsg({
@@ -23,7 +22,7 @@ class TxWidgetWithInfoMsg extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 50.0, left: 30.0, right: 30.0),
+          padding: const EdgeInsets.only(top: 50.0, left: 30.0, right: 30.0),
           child: Text(
             txId.isEmpty
                 ? texts.swap_in_progress_message_processing_previous_request
@@ -35,7 +34,7 @@ class TxWidgetWithInfoMsg extends StatelessWidget {
           TxWidget(
             txID: txId,
             txURL: "https://blockstream.info/tx/$txId",
-            padding: EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 0.0),
+            padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 0.0),
           )
         ]
       ],

@@ -66,7 +66,7 @@ class LNURLFetchInvoicePageState extends State<LNURLFetchInvoicePage> {
         }
 
         Future.delayed(
-          Duration(milliseconds: 200),
+          const Duration(milliseconds: 200),
           () => FocusScope.of(context).requestFocus(_amountFocusNode),
         );
       }
@@ -153,15 +153,8 @@ class LNURLFetchInvoicePageState extends State<LNURLFetchInvoicePage> {
             );
           }),
       appBar: AppBar(
-        iconTheme: themeData.appBarTheme.iconTheme,
-        textTheme: themeData.appBarTheme.textTheme,
-        backgroundColor: themeData.canvasColor,
-        leading: backBtn.BackButton(),
-        title: Text(
-          texts.lnurl_fetch_invoice_pay_to_payee(payee),
-          style: themeData.appBarTheme.textTheme.headline6,
-        ),
-        elevation: 0.0,
+        leading: const backBtn.BackButton(),
+        title: Text(texts.lnurl_fetch_invoice_pay_to_payee(payee)),
       ),
       body: StreamBuilder<AccountModel>(
         stream: accountBloc.accountStream,
@@ -218,17 +211,19 @@ class LNURLFetchInvoicePageState extends State<LNURLFetchInvoicePage> {
                     },
                     style: theme.FieldTextStyle.textStyle,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      texts.lnurl_fetch_invoice_limit(
-                        acc.currency.format(response.minAmount),
-                        acc.currency.format(response.maxAmount),
+                  if (!response.isFixedAmount) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        texts.lnurl_fetch_invoice_limit(
+                          acc.currency.format(response.minAmount),
+                          acc.currency.format(response.maxAmount),
+                        ),
+                        textAlign: TextAlign.left,
+                        style: theme.FieldTextStyle.labelStyle,
                       ),
-                      textAlign: TextAlign.left,
-                      style: theme.FieldTextStyle.labelStyle,
-                    ),
-                  ),
+                    )
+                  ],
                   Container(
                     width: MediaQuery.of(context).size.width,
                     height: 48,
@@ -264,14 +259,14 @@ class LNURLFetchInvoicePageState extends State<LNURLFetchInvoicePage> {
                                 message,
                                 textAlign: TextAlign.center,
                                 style: theme.warningStyle.copyWith(
-                                  color: themeData.errorColor,
+                                  color: themeData.colorScheme.error,
                                 ),
                               ),
                             ],
                           ),
                         );
                       } else {
-                        return SizedBox();
+                        return const SizedBox();
                       }
                     },
                   ),
@@ -312,7 +307,7 @@ class LNURLFetchInvoicePageState extends State<LNURLFetchInvoicePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ConstrainedBox(
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             maxWidth: 125,
             maxHeight: 125,
           ),
@@ -328,8 +323,12 @@ class LNURLFetchInvoicePageState extends State<LNURLFetchInvoicePage> {
   ) {
     _payFetchResponse = response;
     _commentController.text = response.comment;
-    if (response.minAmount == response.maxAmount) {
-      _amountController.text = "${response.minAmount}";
+    if (response.isFixedAmount) {
+      _amountController.text = account.currency.format(
+        response.maxAmount,
+        includeDisplayName: false,
+        userInput: true,
+      );
     }
   }
 

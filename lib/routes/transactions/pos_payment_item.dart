@@ -7,7 +7,7 @@ import 'package:breez/routes/charge/currency_wrapper.dart';
 import 'package:breez/routes/charge/sale_view.dart';
 import 'package:breez/theme_data.dart' as theme;
 import 'package:breez/utils/date.dart';
-import 'package:breez/widgets/payment_details_dialog.dart';
+import 'package:breez/routes/home/widgets/payments_list/payment_details_dialog.dart';
 import 'package:breez/widgets/route.dart';
 import 'package:flutter/material.dart';
 import 'package:breez_translations/breez_translations_locales.dart';
@@ -31,7 +31,7 @@ class PosPaymentItem extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       children: [
         Padding(
-          padding: EdgeInsets.only(bottom: 10.0),
+          padding: const EdgeInsets.only(bottom: 10.0),
           child: ListTile(
             title: Text(
               BreezDateUtils.formatYearMonthDayHourMinute(
@@ -63,8 +63,8 @@ class PosPaymentItem extends StatelessWidget {
         Divider(
           height: 0.0,
           color: _lastItem
-              ? Color.fromRGBO(255, 255, 255, 0.0)
-              : Color.fromRGBO(255, 255, 255, 0.12),
+              ? const Color.fromRGBO(255, 255, 255, 0.0)
+              : const Color.fromRGBO(255, 255, 255, 0.12),
           indent: 16.0,
         ),
       ],

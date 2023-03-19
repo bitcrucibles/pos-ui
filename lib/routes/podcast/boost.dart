@@ -8,11 +8,13 @@ import 'package:breez/bloc/user_profile/breez_user_model.dart';
 import 'package:breez/bloc/user_profile/user_actions.dart';
 import 'package:breez/bloc/user_profile/user_profile_bloc.dart';
 import 'package:breez/routes/podcast/boost_message_dialog.dart';
+import 'package:breez/routes/podcast/widget/number_panel.dart';
 import 'package:breez/utils/min_font_size.dart';
 import 'package:breez/widgets/flushbar.dart';
+import 'package:breez_translations/breez_translations_locales.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:breez_translations/breez_translations_locales.dart';
+
 import 'custom_amount_dialog.dart';
 
 class BoostWidget extends StatelessWidget {
@@ -39,13 +41,13 @@ class BoostWidget extends StatelessWidget {
       stream: accountBloc.accountStream,
       builder: (context, acc) {
         if (acc.data == null) {
-          return SizedBox();
+          return const SizedBox();
         }
         return Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
+            SizedBox(
               width: 88,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
@@ -81,18 +83,18 @@ class BoostWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6.0),
                       side: BorderSide(
                         color: themeData.brightness == Brightness.light
-                            ? Color(0xFF0085fb)
+                            ? const Color(0xFF0085fb)
                             : Colors.white70,
                         width: 1.6,
                       ),
                     ),
                   ),
                   icon: ImageIcon(
-                    AssetImage("src/icon/boost.png"),
+                    const AssetImage("src/icon/boost.png"),
                     size: 20,
                     color: themeData.appBarTheme.actionsIconTheme.color,
                   ),
-                  label: Container(
+                  label: SizedBox(
                     width: 44,
                     child: AutoSizeText(
                       texts.podcast_boost_action_boost,
@@ -115,13 +117,32 @@ class BoostWidget extends StatelessWidget {
               fit: FlexFit.tight,
               flex: 1,
               child: Center(
-                child: Container(
+                child: SizedBox(
                   width: 92,
                   child: Stack(
                     fit: StackFit.loose,
                     children: [
                       _minusButton(context),
-                      _numberPanel(context, userBloc),
+                      Positioned(
+                        left: 24,
+                        top: 16,
+                        child: NumberPanel(
+                          topLabel: _formatBoostAmount(context),
+                          bottomLabel: texts.podcast_boost_sats,
+                          width: 42,
+                          innerWidth: 38,
+                          onTap: () => showDialog(
+                            useRootNavigator: false,
+                            context: context,
+                            builder: (c) => CustomAmountDialog(
+                              userModel.paymentOptions.customBoostValue,
+                              userModel.paymentOptions.presetBoostAmountsList,
+                              (boostAmount) =>
+                                  _setBoostAmount(userBloc, boostAmount),
+                            ),
+                          ),
+                        ),
+                      ),
                       _plusButton(context),
                     ],
                   ),
@@ -137,7 +158,7 @@ class BoostWidget extends StatelessWidget {
   Widget _minusButton(BuildContext context) {
     final themeData = Theme.of(context);
     return GestureDetector(
-      child: Container(
+      child: SizedBox(
         width: 32,
         height: 64,
         child: Material(
@@ -159,68 +180,12 @@ class BoostWidget extends StatelessWidget {
     );
   }
 
-  Widget _numberPanel(BuildContext context, UserProfileBloc userBloc) {
-    final texts = context.texts();
-    final minFontSize = 9.0 / MediaQuery.of(context).textScaleFactor;
-    return Positioned(
-      left: 24,
-      top: 16,
-      child: GestureDetector(
-        onTap: () => showDialog(
-          useRootNavigator: false,
-          context: context,
-          builder: (c) => CustomAmountDialog(
-            userModel.paymentOptions.customBoostValue,
-            userModel.paymentOptions.presetBoostAmountsList,
-            (boostAmount) => _setBoostAmount(userBloc, boostAmount),
-          ),
-        ),
-        child: SizedBox(
-          width: 42,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 38,
-                height: 20,
-                child: AutoSizeText(
-                  _formatBoostAmount(context),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.3,
-                    letterSpacing: 1,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                  minFontSize: minFontSize,
-                  stepGranularity: 0.1,
-                  maxLines: 1,
-                ),
-              ),
-              AutoSizeText(
-                texts.podcast_boost_sats,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1,
-                ),
-                minFontSize: MinFontSize(context).minFontSize,
-                stepGranularity: 0.1,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _plusButton(BuildContext context) {
     final themeData = Theme.of(context);
     return Positioned(
       left: 60,
       child: GestureDetector(
-        child: Container(
+        child: SizedBox(
           width: 32,
           height: 64,
           child: Material(

@@ -21,7 +21,7 @@ class PaymentItemAvatar extends StatelessWidget {
           radius: radius,
           backgroundColor: Colors.white,
           child: ImageIcon(
-            AssetImage("src/icon/podcast.png"),
+            const AssetImage("src/icon/podcast.png"),
             color: theme.BreezColors.blue[500],
             size: 0.6 * radius * 2,
           ),
@@ -31,10 +31,11 @@ class PaymentItemAvatar extends StatelessWidget {
       final metadataImage = _metadataImage();
       if (metadataImage != null) return metadataImage;
 
-      IconData icon = paymentItem.type == PaymentType.RECEIVED
+      IconData icon = (paymentItem.type == PaymentType.RECEIVED ||
+              paymentItem.type == PaymentType.DEPOSIT)
           ? Icons.add_rounded
           : Icons.remove_rounded;
-      Widget child = Icon(icon, color: Color(0xb3303234));
+      Widget child = Icon(icon, color: const Color(0xb3303234));
       return CircleAvatar(
         radius: radius,
         backgroundColor: Colors.white,
@@ -57,7 +58,7 @@ class PaymentItemAvatar extends StatelessWidget {
         return CircleAvatar(
           radius: radius,
           backgroundColor: Colors.white,
-          child: Container(
+          child: SizedBox(
             width: size,
             height: size,
             child: image,

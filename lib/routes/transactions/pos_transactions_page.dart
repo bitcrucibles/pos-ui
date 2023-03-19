@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:breez/bloc/account/account_actions.dart';
 import 'package:breez/bloc/account/account_bloc.dart';
 import 'package:breez/bloc/account/account_model.dart';
@@ -10,8 +8,8 @@ import 'package:breez/widgets/calendar_dialog.dart';
 import 'package:breez/widgets/flushbar.dart';
 import 'package:breez/widgets/loader.dart';
 import 'package:breez/widgets/pos_report_dialog.dart';
-import 'package:flutter/material.dart';
 import 'package:breez_translations/breez_translations_locales.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -61,7 +59,7 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
 
             if ((account != null && !account.initial) &&
                 (paymentsModel != null &&
-                    paymentsModel.paymentsList.length == 0 &&
+                    paymentsModel.paymentsList.isEmpty &&
                     paymentsModel.filter == PaymentFilterModel.initial())) {
               return _buildScaffold(
                 context,
@@ -92,21 +90,13 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
     List<Widget> actions,
   ]) {
     final texts = context.texts();
-    final themeData = Theme.of(context);
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        iconTheme: themeData.appBarTheme.iconTheme,
-        textTheme: themeData.appBarTheme.textTheme,
-        backgroundColor: themeData.canvasColor,
-        leading: backBtn.BackButton(),
-        title: Text(
-          texts.pos_transactions_title,
-          style: themeData.appBarTheme.textTheme.headline6,
-        ),
-        actions: actions == null ? [] : actions,
-        elevation: 0.0,
+        leading: const backBtn.BackButton(),
+        title: Text(texts.pos_transactions_title),
+        actions: actions ?? [],
       ),
       body: body,
     );
@@ -119,14 +109,17 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
     return IconButton(
       icon: SvgPicture.asset(
         "src/icon/pos_report.svg",
-        color: themeData.iconTheme.color,
+        colorFilter: ColorFilter.mode(
+          themeData.iconTheme.color,
+          BlendMode.srcATop,
+        ),
         width: 24.0,
         height: 24.0,
       ),
       onPressed: () => showDialog(
         useRootNavigator: false,
         context: context,
-        builder: (_) => PosReportDialog(),
+        builder: (_) => const PosReportDialog(),
       ),
     );
   }
@@ -136,7 +129,10 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
     return IconButton(
       icon: SvgPicture.asset(
         "src/icon/calendar.svg",
-        color: themeData.iconTheme.color,
+        colorFilter: ColorFilter.mode(
+          themeData.iconTheme.color,
+          BlendMode.srcATop,
+        ),
         width: 24.0,
         height: 24.0,
       ),
@@ -166,13 +162,13 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
       return Padding(
         padding: const EdgeInsets.only(right: 16.0),
         child: PopupMenuButton(
-          color: themeData.backgroundColor,
+          color: themeData.colorScheme.background,
           icon: Icon(
             Icons.more_vert,
             color: themeData.iconTheme.color,
           ),
           padding: EdgeInsets.zero,
-          offset: Offset(0, 48),
+          offset: const Offset(0, 48),
           onSelected: _select,
           itemBuilder: (context) => [
             PopupMenuItem(
@@ -180,7 +176,7 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
               value: Choice(() => _exportTransactions(context)),
               child: Text(
                 texts.pos_transactions_action_export,
-                style: themeData.textTheme.button,
+                style: themeData.textTheme.labelLarge,
               ),
             ),
           ],
@@ -204,16 +200,22 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
     choice.function();
   }
 
-  Future _exportTransactions(BuildContext context) async {
+  _exportTransactions(BuildContext context) {
     final texts = context.texts();
+    final navigator = Navigator.of(context);
     var action = ExportPayments();
     _accountBloc.userActionsSink.add(action);
-    Navigator.of(context).push(createLoaderRoute(context));
+    var loaderRoute = createLoaderRoute(context);
+    navigator.push(loaderRoute);
     action.future.then((filePath) {
-      Navigator.of(context).pop();
-      Share.shareFiles([filePath]);
+      if (loaderRoute.isActive) {
+        navigator.removeRoute(loaderRoute);
+      }
+      Share.shareXFiles([XFile(filePath)]);
     }).catchError((err) {
-      Navigator.of(context).pop();
+      if (loaderRoute.isActive) {
+        navigator.removeRoute(loaderRoute);
+      }
       showFlushbar(
         context,
         message: texts.pos_transactions_action_export_failed,
@@ -227,7 +229,6 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
     AccountModel accountModel,
   ) {
     final texts = context.texts();
-    final themeData = Theme.of(context);
     final filter = paymentsModel.filter;
     final payments = paymentsModel.paymentsList;
     final hasDateRange = filter.startDate != null && filter.endDate != null;
@@ -235,7 +236,7 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        (hasDateRange && payments.length == 0)
+        (hasDateRange && payments.isEmpty)
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -255,13 +256,11 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
                   hasDateRange
                       ? SliverAppBar(
                           pinned: true,
-                          elevation: 0.0,
                           expandedHeight: 32.0,
                           automaticallyImplyLeading: false,
-                          backgroundColor: themeData.canvasColor,
                           flexibleSpace: _buildDateFilterChip(filter),
                         )
-                      : SliverPadding(
+                      : const SliverPadding(
                           padding: EdgeInsets.zero,
                         ),
                   PosPaymentsList(
@@ -286,7 +285,7 @@ class PosTransactionsPageState extends State<PosTransactionsPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 16.0),
+          padding: const EdgeInsets.only(left: 16.0),
           child: Chip(
             label: Text(
               BreezDateUtils.formatFilterDateRange(
